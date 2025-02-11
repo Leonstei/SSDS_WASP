@@ -1,6 +1,6 @@
 ﻿<Window x:Class="KinectWASP.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Kinect App" Width="1300" Height="800">
+        Title="Kinect App" Width="1280" Height="700">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />

@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using KinectTest.Helper;
 using Microsoft.Kinect;
 
 namespace KinectWASP
@@ -11,6 +12,7 @@ namespace KinectWASP
         
         //Intermediate storage for the depth data received from the camera 
         private DepthImagePixel[] _depthPixels;
+        private short[] _depthPixels2;
         
         //Bitmap that will hold depth information
         private BitmapSource _depthBitmap;
@@ -42,14 +44,16 @@ namespace KinectWASP
             _kinectSensor = KinectSensor.KinectSensors.FirstOrDefault(x => x.Status == KinectStatus.Connected);
             if (_kinectSensor != null)
             {
+                
                 _kinectSensor.SkeletonStream.Enable();
                 _kinectSensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
                 _kinectSensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
-                _kinectSensor.ColorFrameReady += KinectSensor_ColorFrameReady;
+                //_kinectSensor.ColorFrameReady += KinectSensor_ColorFrameReady;
                 _kinectSensor.DepthFrameReady += KinectSensor_DepthFrameReady;
                 _kinectSensor.SkeletonFrameReady += KinectSensor_SkeletonFrameReady;
                 
                 _depthPixels = new DepthImagePixel[_kinectSensor.DepthStream.FramePixelDataLength];
+                _depthPixels2 = new short[_kinectSensor.DepthStream.FramePixelDataLength];
 
                 _depthData = new byte[_kinectSensor.DepthStream.FramePixelDataLength * sizeof(int)]; 
                 
@@ -84,66 +88,123 @@ namespace KinectWASP
                         if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                         {
                             // Zugriff auf Gelenkpunkte eines getrackten Skeletts
-                            Joint headJoint = skeleton.Joints[JointType.Head];
+                            //Joint headJoint = skeleton.Joints[JointType.Head];
                             Joint handRightJoint = skeleton.Joints[JointType.HandRight];
-                            Joint handLeftJoint = skeleton.Joints[JointType.HandLeft];
+                            //Joint handLeftJoint = skeleton.Joints[JointType.HandLeft];
                             Joint wristRightJoint = skeleton.Joints[JointType.WristRight];
+                            Joint elbowRightJoint = skeleton.Joints[JointType.ElbowRight];
 
-                            if (handRightJoint.TrackingState == JointTrackingState.Tracked)
+                            if (wristRightJoint.TrackingState == JointTrackingState.Tracked &&
+                                elbowRightJoint.TrackingState == JointTrackingState.Tracked)
                             {
-                                SkeletonPoint wristPosition = handRightJoint.Position;
+                                
+                                //Console.WriteLine($"wristRight:{wristRightJoint.Position.X}elbow:{wristRightJoint.Position.Y}");
+                                SkeletonPoint wristPosition = wristRightJoint.Position;
                                 DepthImagePoint wristDepthPoint = _kinectSensor.CoordinateMapper.MapSkeletonPointToDepthPoint(
                                     wristPosition, 
                                     DepthImageFormat.Resolution640x480Fps30
                                 );
-                                int wristX = wristDepthPoint.X; 
-                                int wristY = wristDepthPoint.Y; 
-                                int wristDepth = wristDepthPoint.Depth;
-                                
-                                int boxWidth = 110;  // Breite des Bereichs
-                                int boxHeight = 110; // Höhe des Bereichs
+                                SkeletonPoint elbowPosition = elbowRightJoint.Position;
+                                DepthImagePoint elbowDepthPoint = _kinectSensor.CoordinateMapper.MapSkeletonPointToDepthPoint(
+                                    elbowPosition, 
+                                    DepthImageFormat.Resolution640x480Fps30
+                                );
+                                // for (int i = 0; i < _depthPixels.Length; i++)
+                                // {
+                                //     // Berechne die (x, y)-Koordinaten des Pixels aus dem Array-Index
+                                //     int x = i % 640; // Spaltenindex
+                                //     int y = i / 640;
+                                //     if (Math.Abs(_depthPixels2[i] - wristDepthPoint.Depth) < 110)
+                                //     {
+                                //         _depthData[i] = 0;
+                                //     }
+                                // }
 
-                                // Grenzen des Rechtecks berechnen (stellen Sie sicher, dass sie im Bildbereich bleiben)
-                                int startX = Math.Max(0, wristX - boxWidth / 2);
-                                int startY = Math.Max(0, wristY - boxHeight / 2);
-                                int endX = Math.Min(639, wristX + boxWidth / 2); // 640 ist typischerweise die Breite des Tiefenbilds
-                                int endY = Math.Min(479, wristY + boxHeight / 2); // 480 ist typischerweise die Höhe des Tiefenbilds
-
-                                DepthImagePixel[] extractedDepth = new DepthImagePixel[_depthPixels.Length];
-                                byte[] depthData = new byte[12100];
-                                int i = 0;
-                                for (int y = startY; y < endY; y++)
-                                {
-                                    for (int x = startX; x < endX; x++)
-                                    {
-                                        short depth = _depthPixels[x + y * 640].Depth;
-                                        // Tiefe-Wert übernehmen
-                                        extractedDepth[i] =
-                                            _depthPixels[x + y * 640]; // 640 = Breite des ursprünglichen Tiefenbilds
-                                        
-                                        if (depth >= 800 && depth <= 3600)
-                                        {
-                                            depthData[i] = (byte)(255 - ((depth - 800) * 255 / (3600 - 800)));
-                                        }
-                                        else
-                                        {
-                                            depthData[i] = 0;
-                                        }
-                                        i++;
-                                    }
-                                }
+                                //Console.WriteLine($"wristRight:{wristDepthPoint.X}elbow:{wristDepthPoint.Y}");
+                                DepthTransformation depthTransformation = new();
+                                byte[] newDepthPixels = depthTransformation.StartDepthTransformation(_depthPixels2, wristDepthPoint, elbowDepthPoint);
                                 BitmapSource grayscaleBitmap = BitmapSource.Create(
-                                    110,
-                                    110,
+                                    640,
+                                    480,
                                     96,
                                     96,
                                     PixelFormats.Gray8,
                                     null,
-                                    depthData,
-                                    110
+                                    newDepthPixels,
+                                    640
                                 );
+                                
+                                // BitmapSource grayscaleBitmap2 = BitmapSource.Create(
+                                //     640,
+                                //     480,
+                                //     96,
+                                //     96,
+                                //     PixelFormats.Gray8,
+                                //     null,
+                                //     _depthData,
+                                //     640
+                                // );
+                                //
+                                // DepthVideo.Source  = grayscaleBitmap2;
                                 KinectVideo.Source = grayscaleBitmap;
                                 
+                            }
+                            if (handRightJoint.TrackingState == JointTrackingState.Tracked)
+                            {
+
+                                 SkeletonPoint wristPosition = handRightJoint.Position;
+                                 DepthImagePoint wristDepthPoint = _kinectSensor.CoordinateMapper.MapSkeletonPointToDepthPoint(
+                                     wristPosition, 
+                                     DepthImageFormat.Resolution640x480Fps30
+                                 );
+                                // int wristX = wristDepthPoint.X; 
+                                // int wristY = wristDepthPoint.Y; 
+                                // int wristDepth = wristDepthPoint.Depth;
+                                //
+                                // int boxWidth = 110;  // Breite des Bereichs
+                                // int boxHeight = 110; // Höhe des Bereichs
+                                //
+                                // // Grenzen des Rechtecks berechnen (stellen Sie sicher, dass sie im Bildbereich bleiben)
+                                // int startX = Math.Max(0, wristX - boxWidth / 2);
+                                // int startY = Math.Max(0, wristY - boxHeight / 2);
+                                // int endX = Math.Min(639, wristX + boxWidth / 2); // 640 ist typischerweise die Breite des Tiefenbilds
+                                // int endY = Math.Min(479, wristY + boxHeight / 2); // 480 ist typischerweise die Höhe des Tiefenbilds
+                                //
+                                // DepthImagePixel[] extractedDepth = new DepthImagePixel[_depthPixels.Length];
+                                // byte[] depthData = new byte[12100];
+                                // int i = 0;
+                                // for (int y = startY; y < endY; y++)
+                                // {
+                                //     for (int x = startX; x < endX; x++)
+                                //     {
+                                //         short depth = _depthPixels[x + y * 640].Depth;
+                                //         // Tiefe-Wert übernehmen
+                                //         extractedDepth[i] =
+                                //             _depthPixels[x + y * 640]; // 640 = Breite des ursprünglichen Tiefenbilds
+                                //         
+                                //         if (depth >= 800 && depth <= 3600)
+                                //         {
+                                //             depthData[i] = (byte)(255 - ((depth - 800) * 255 / (3600 - 800)));
+                                //         }
+                                //         else
+                                //         {
+                                //             depthData[i] = 0;
+                                //         }
+                                //         i++;
+                                //     }
+                                // }
+                                // BitmapSource grayscaleBitmap = BitmapSource.Create(
+                                //     110,
+                                //     110,
+                                //     96,
+                                //     96,
+                                //     PixelFormats.Gray8,
+                                //     null,
+                                //     depthData,
+                                //     110
+                                // );
+                                // KinectVideo.Source = grayscaleBitmap;
+                                //
                             }
                             
                             
@@ -161,15 +222,18 @@ namespace KinectWASP
                 {
                     // Copy the pixel data from the image to a temporary array
                     depthFrame.CopyDepthImagePixelDataTo(_depthPixels);
-                    
+                    Parallel.For(0, _depthPixels.Length, i =>
+                    {
+                        _depthPixels2[i] = _depthPixels[i].Depth; 
+                    });
                     // Get the min and max reliable depth for the current frame
-                    int minDepth = depthFrame.MinDepth;
-                    int maxDepth = depthFrame.MaxDepth;
+                    int minDepth = 800;
+                    int maxDepth = 4000;
                     
-                    for (int i = 0; i < _depthPixels.Length; ++i)
+                    for (int i = 0; i < _depthPixels2.Length; ++i)
                     {
                         // Get the depth for this pixel
-                        short depth = _depthPixels[i].Depth;
+                        short depth = _depthPixels2[i];
                         
                         if (depth >= minDepth && depth <= maxDepth)
                         {
@@ -194,7 +258,7 @@ namespace KinectWASP
                         _depthData,
                         depthFrame.Width
                     );
-                    DepthVideo.Source  = grayscaleBitmap;
+                    
                     
                     KinectVideo.Source = grayscaleBitmap;
                 }

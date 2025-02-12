@@ -34,7 +34,7 @@ public class DepthTransformation
     // Transformation der Tiefenpixel mit der Rotationsmatrix
     public static byte[] TransformDepthPixels(short[] depthPixels, int width, int height, Matrix2x2 rotationMatrix, Vector2D wirstPosition)
     {
-        short[] transformedPixels = new short[depthPixels.Length];
+        //short[] transformedPixels = new short[depthPixels.Length];
         //int  newIndexes = 0;
         byte[] newDepth = new byte[depthPixels.Length];
         
@@ -77,39 +77,39 @@ public class DepthTransformation
         //         newDepth[i] = 0;
         //     }
         // }
-        
-         for (int i = 0; i < depthPixels.Length; i++)
-         {
-             // Berechne die (x, y)-Koordinaten des Pixels aus dem Array-Index
-             int x = i % width;        // Spaltenindex
-             int y = i / width;        // Zeilenindex
-        
-             // double distanceSquared = Math.Abs(x - translation.X) + Math.Abs(y - translation.Y);
-             // if (distanceSquared < 100)
-             // {
-                 Vector2D originalPosition = new Vector2D(x - wirstPosition.X, y - wirstPosition.Y);
-        
-                 // Wende die Rotationsmatrix und die Translation an
-                 Vector2D newPosition = rotationMatrix.Multiply(originalPosition) + wirstPosition;
-                 //Vector2D newPosition =  rotatedPosition +  translation;
-             
-             
-                 // Überprüfe, ob die neuen Koordinaten im Bildbereich liegen
-                 if (newPosition.X >= 0 && newPosition.X < width && newPosition.Y >= 0 && newPosition.Y < height)
-                 {
-                     //newIndexes++;
-                     int newIndex = (int)newPosition.Y * width + (int)newPosition.X;
-                     // Übertrage den Tiefenwert auf die neue Position
-                     //transformedPixels[newIndex] = depthPixels[i];
-                     newDepth[newIndex] = (byte)(255 - ((depthPixels[i] - 800) * 255 / (3600 - 800)));
-                 }
-                 else
-                 {
-                     newDepth[i] = 0;
-                 }
-             //}
-             
-         }
+
+        Parallel.For(0, depthPixels.Length, i =>
+        {
+            // Berechne die (x, y)-Koordinaten des Pixels aus dem Array-Index
+            int x = i % width; // Spaltenindex
+            int y = i / width; // Zeilenindex
+
+            // double distanceSquared = Math.Abs(x - translation.X) + Math.Abs(y - translation.Y);
+            // if (distanceSquared < 100)
+            // {
+            Vector2D originalPosition = new Vector2D(x - wirstPosition.X, y - wirstPosition.Y);
+
+            // Wende die Rotationsmatrix und die Translation an
+            Vector2D newPosition = rotationMatrix.Multiply(originalPosition) + wirstPosition;
+            //Vector2D newPosition =  rotatedPosition +  translation;
+
+
+            // Überprüfe, ob die neuen Koordinaten im Bildbereich liegen
+            if (newPosition.X >= 0 && newPosition.X < width && newPosition.Y >= 0 && newPosition.Y < height)
+            {
+                //newIndexes++;
+                int newIndex = (int)newPosition.Y * width + (int)newPosition.X;
+                // Übertrage den Tiefenwert auf die neue Position
+                //transformedPixels[newIndex] = depthPixels[i];
+                newDepth[newIndex] = (byte)(255 - ((depthPixels[i] - 800) * 255 / (3600 - 800)));
+            }
+            else
+            {
+                newDepth[i] = 0;
+            }
+            //}
+
+        });
         //Console.WriteLine($"Anzahl der transformierten Pixel: {newIndexes}");
         //Console.WriteLine($"Rotationsmatrix: {rotationMatrix.M11}, {rotationMatrix.M12}, {rotationMatrix.M21}, {rotationMatrix.M22}");
 

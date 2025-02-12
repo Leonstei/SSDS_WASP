@@ -57,10 +57,10 @@ namespace KinectWASP
 
                 _depthData = new byte[_kinectSensor.DepthStream.FramePixelDataLength * sizeof(int)]; 
                 
-                _depthBitmap = BitmapSource.Create(
-                    _kinectSensor.DepthStream.FrameWidth, _kinectSensor.DepthStream.FrameHeight, 96.0, 96.0, 
-                    PixelFormats.Gray8, null, _depthData, _kinectSensor.DepthStream.FrameWidth );
-                DepthVideo.Source = _depthBitmap;
+                // _depthBitmap = BitmapSource.Create(
+                //     _kinectSensor.DepthStream.FrameWidth, _kinectSensor.DepthStream.FrameHeight, 96.0, 96.0, 
+                //     PixelFormats.Gray8, null, _depthData, _kinectSensor.DepthStream.FrameWidth );
+                // DepthVideo.Source = _depthBitmap;
 
                 _clolorData = new byte[_kinectSensor.ColorStream.FramePixelDataLength];
                 _colorBitmap = new WriteableBitmap(640, 480, 96.0, 96.0, System.Windows.Media.PixelFormats.Bgr32, null);
@@ -222,10 +222,10 @@ namespace KinectWASP
                 {
                     // Copy the pixel data from the image to a temporary array
                     depthFrame.CopyDepthImagePixelDataTo(_depthPixels);
-                    Parallel.For(0, _depthPixels.Length, i =>
+                    for(int i = 0; i < _depthPixels2.Length; ++i)
                     {
-                        _depthPixels2[i] = _depthPixels[i].Depth; 
-                    });
+                        _depthPixels2[i] = _depthPixels[i].Depth;
+                    }
                     // Get the min and max reliable depth for the current frame
                     int minDepth = 800;
                     int maxDepth = 4000;
@@ -248,19 +248,19 @@ namespace KinectWASP
                         }
                         
                     }
-                    BitmapSource grayscaleBitmap = BitmapSource.Create(
-                        depthFrame.Width,
-                        depthFrame.Height,
-                        96,
-                        96,
-                        PixelFormats.Gray8,
-                        null,
-                        _depthData,
-                        depthFrame.Width
-                    );
-                    
-                    
-                    KinectVideo.Source = grayscaleBitmap;
+                    // BitmapSource grayscaleBitmap = BitmapSource.Create(
+                    //     depthFrame.Width,
+                    //     depthFrame.Height,
+                    //     96,
+                    //     96,
+                    //     PixelFormats.Gray8,
+                    //     null,
+                    //     _depthData,
+                    //     depthFrame.Width
+                    // );
+                    //
+                    //
+                    // KinectVideo.Source = grayscaleBitmap;
                 }
                 
             }

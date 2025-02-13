@@ -1,0 +1,69 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\ramon\\Desktop\\Eins Studium Krams\\Kinect\\SSDS_WASP\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|c:\\users\\ramon\\desktop\\eins studium krams\\kinect\\ssds_wasp\\kinectwasp\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|solutionrelative:kinectwasp\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|c:\\users\\ramon\\desktop\\eins studium krams\\kinect\\ssds_wasp\\kinectwasp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|solutionrelative:kinectwasp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|c:\\users\\ramon\\desktop\\eins studium krams\\kinect\\ssds_wasp\\kinectwasp\\kinectwasp.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|solutionrelative:kinectwasp\\kinectwasp.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "KinectWASP",
+              "DocumentMoniker": "C:\\Users\\ramon\\Desktop\\Eins Studium Krams\\Kinect\\SSDS_WASP\\KinectWASP\\KinectWASP.csproj",
+              "RelativeDocumentMoniker": "KinectWASP\\KinectWASP.csproj",
+              "ToolTip": "C:\\Users\\ramon\\Desktop\\Eins Studium Krams\\Kinect\\SSDS_WASP\\KinectWASP\\KinectWASP.csproj",
+              "RelativeToolTip": "KinectWASP\\KinectWASP.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-02-05T16:32:03.007Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\ramon\\Desktop\\Eins Studium Krams\\Kinect\\SSDS_WASP\\KinectWASP\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "KinectWASP\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\ramon\\Desktop\\Eins Studium Krams\\Kinect\\SSDS_WASP\\KinectWASP\\MainWindow.xaml.cs",
+              "RelativeToolTip": "KinectWASP\\MainWindow.xaml.cs",
+              "ViewState": "AQIAAG8BAAAAAAAAAAAYwHcBAAAVAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-05T16:15:29.255Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\ramon\\Desktop\\Eins Studium Krams\\Kinect\\SSDS_WASP\\KinectWASP\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "KinectWASP\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\ramon\\Desktop\\Eins Studium Krams\\Kinect\\SSDS_WASP\\KinectWASP\\MainWindow.xaml",
+              "RelativeToolTip": "KinectWASP\\MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-02-05T16:15:24.745Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

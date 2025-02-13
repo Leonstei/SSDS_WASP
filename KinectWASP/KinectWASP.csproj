@@ -2,13 +2,19 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net48</TargetFramework>
+        <TargetFramework>net481</TargetFramework>
         <LangVersion>10.0</LangVersion>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
         <RootNamespace>KinectTest</RootNamespace>
+        <PlatformTarget>x64</PlatformTarget>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Emgu.CV" Version="4.10.0.5680" />
+      <PackageReference Include="Emgu.CV.runtime.windows" Version="4.10.0.5680" />
+    </ItemGroup>
 
     <ItemGroup>
       <Reference Include="Microsoft.Kinect">

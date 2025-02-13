@@ -42,7 +42,7 @@ namespace KinectWASP
                 _kinectSensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
                 _kinectSensor.ColorFrameReady += KinectSensor_ColorFrameReady;
                 _kinectSensor.DepthFrameReady += KinectSensor_DepthFrameReady;
-                _kinectSensor.SkeletonFrameReady += KinectSensor_SkeletonFrameReady;
+                //_kinectSensor.SkeletonFrameReady += KinectSensor_SkeletonFrameReady;
                 
                 _depthPixels = new DepthImagePixel[_kinectSensor.DepthStream.FramePixelDataLength];
 
@@ -55,7 +55,7 @@ namespace KinectWASP
 
                 _clolorData = new byte[_kinectSensor.ColorStream.FramePixelDataLength];
                 _colorBitmap = new WriteableBitmap(640, 480, 96.0, 96.0, System.Windows.Media.PixelFormats.Bgr32, null);
-                KinectVideo.Source = _colorBitmap;
+                //KinectVideo.Source = _colorBitmap;
 
                 _kinectSensor.Start();
             }
@@ -117,11 +117,15 @@ namespace KinectWASP
                     // Get the min and max reliable depth for the current frame
                     int minDepth = depthFrame.MinDepth;
                     int maxDepth = 3600;
+                    DepthImagePixel[] denoisedOnce = DenoisDepthPixels(_depthPixels, 640, 480);
+                    //DepthImagePixel[] denoisedDepthPixels = DenoisDepthPixels(denoisedOnce, 640, 480);
+                    byte[] depthData2 = new byte[_depthData.Length];
                     
                     for (int i = 0; i < _depthPixels.Length; ++i)
                     {
                         // Get the depth for this pixel
                         short depth = _depthPixels[i].Depth;
+                        short denoisedDepth = denoisedOnce[i].Depth;
 
                         if (depth >= minDepth && depth <= maxDepth)
                         {
@@ -132,6 +136,16 @@ namespace KinectWASP
                         {
                             // Setzen Sie außerhalb des Bereichs liegende Pixel auf Schwarz (ARGB = 0)
                             _depthData[i] = 0;
+                        }
+                        if (denoisedDepth >= minDepth && denoisedDepth <= maxDepth)
+                        {
+                            byte brightness2 = (byte)(255 - ((denoisedDepth - minDepth) * 255 / (maxDepth - minDepth)));
+                            depthData2[i] = brightness2; // Helle Objekte = Nah / Dunkle Objekte = Fern
+                        }
+                        else
+                        {
+                            // Setzen Sie außerhalb des Bereichs liegende Pixel auf Schwarz (ARGB = 0)
+                            depthData2[i] = 0;
                         }
                     }
                     BitmapSource grayscaleBitmap = BitmapSource.Create(
@@ -145,11 +159,142 @@ namespace KinectWASP
                         depthFrame.Width
                     );
                     DepthVideo.Source  = grayscaleBitmap;
+                    BitmapSource grayscaleBitmap2 = BitmapSource.Create(
+                        depthFrame.Width,
+                        depthFrame.Height,
+                        96,
+                        96,
+                        PixelFormats.Gray8,
+                        null,
+                        depthData2,
+                        depthFrame.Width
+                    );
+                    KinectVideo.Source = grayscaleBitmap2;
                 }
                 
             }
         }
+        
+        // Funktion zum Glätten des Tiefenbildes mit anpassbarem Sigma und Kernelgröße
+        private DepthImagePixel[] DenoisDepthPixels(DepthImagePixel[] depthPixels, int width, int height)
+        { 
+            double[,] gaussian16x16_sigma15 = new double[,]
+{
+    {0.0039, 0.0040, 0.0040, 0.0041, 0.0041, 0.0041, 0.0041, 0.0041, 0.0041, 0.0041, 0.0041, 0.0041, 0.0040, 0.0040, 0.0040, 0.0039},
+    {0.0040, 0.0041, 0.0041, 0.0042, 0.0042, 0.0042, 0.0042, 0.0042, 0.0042, 0.0042, 0.0042, 0.0042, 0.0041, 0.0041, 0.0041, 0.0040},
+    {0.0040, 0.0041, 0.0042, 0.0042, 0.0042, 0.0043, 0.0043, 0.0043, 0.0043, 0.0043, 0.0043, 0.0042, 0.0042, 0.0042, 0.0041, 0.0040},
+    {0.0041, 0.0042, 0.0042, 0.0043, 0.0043, 0.0044, 0.0044, 0.0044, 0.0044, 0.0044, 0.0043, 0.0043, 0.0043, 0.0042, 0.0042, 0.0041},
+    {0.0041, 0.0042, 0.0042, 0.0043, 0.0044, 0.0044, 0.0045, 0.0045, 0.0045, 0.0044, 0.0044, 0.0044, 0.0043, 0.0042, 0.0042, 0.0041},
+    {0.0041, 0.0042, 0.0043, 0.0044, 0.0044, 0.0045, 0.0045, 0.0046, 0.0045, 0.0045, 0.0044, 0.0044, 0.0043, 0.0043, 0.0042, 0.0041},
+    {0.0041, 0.0042, 0.0043, 0.0044, 0.0045, 0.0045, 0.0046, 0.0046, 0.0046, 0.0045, 0.0045, 0.0044, 0.0044, 0.0043, 0.0042, 0.0041},
+    {0.0041, 0.0042, 0.0043, 0.0044, 0.0045, 0.0046, 0.0046, 0.0047, 0.0046, 0.0046, 0.0045, 0.0045, 0.0044, 0.0043, 0.0042, 0.0041},
+    {0.0041, 0.0042, 0.0043, 0.0044, 0.0045, 0.0046, 0.0046, 0.0046, 0.0046, 0.0046, 0.0045, 0.0045, 0.0044, 0.0043, 0.0042, 0.0041},
+    {0.0041, 0.0042, 0.0043, 0.0044, 0.0045, 0.0046, 0.0046, 0.0046, 0.0046, 0.0046, 0.0045, 0.0045, 0.0044, 0.0043, 0.0042, 0.0041},
+    {0.0041, 0.0042, 0.0043, 0.0044, 0.0045, 0.0046, 0.0046, 0.0046, 0.0046, 0.0046, 0.0045, 0.0045, 0.0044, 0.0043, 0.0042, 0.0041},
+    {0.0041, 0.0042, 0.0043, 0.0044, 0.0044, 0.0045, 0.0045, 0.0046, 0.0045, 0.0045, 0.0044, 0.0044, 0.0043, 0.0043, 0.0042, 0.0041},
+    {0.0041, 0.0042, 0.0042, 0.0043, 0.0044, 0.0044, 0.0045, 0.0045, 0.0045, 0.0044, 0.0044, 0.0044, 0.0043, 0.0042, 0.0042, 0.0041},
+    {0.0041, 0.0042, 0.0042, 0.0043, 0.0043, 0.0044, 0.0044, 0.0044, 0.0044, 0.0044, 0.0043, 0.0043, 0.0043, 0.0042, 0.0042, 0.0041},
+    {0.0040, 0.0041, 0.0042, 0.0042, 0.0042, 0.0043, 0.0043, 0.0043, 0.0043, 0.0043, 0.0043, 0.0042, 0.0042, 0.0042, 0.0041, 0.0040},
+    {0.0039, 0.0040, 0.0040, 0.0041, 0.0041, 0.0041, 0.0041, 0.0041, 0.0041, 0.0041, 0.0041, 0.0041, 0.0040, 0.0040, 0.0040, 0.0039}
+};
 
+
+            
+
+        int kernelSize = 3; // 3x3 Kernel
+        int kernelSum = 16; // Summe der Kernelwerte zur Normalisierung
+        int offset = kernelSize / 2;
+
+        // Neues Array für geglättete Tiefenwerte
+        DepthImagePixel[] smoothedPixels = new DepthImagePixel[depthPixels.Length];
+
+        // Durch das Bild iterieren
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+                double weightedSum = 0;
+                double validWeightSum = 0; // Um zu verhindern, dass ungültige Tiefenwerte das Ergebnis verfälschen
+
+                // Über den Kernel iterieren
+                for (int ky = -offset; ky <= offset; ky++)
+                {
+                    for (int kx = -offset; kx <= offset; kx++)
+                    {
+                        int pixelX = x + kx;
+                        int pixelY = y + ky;
+
+                        // Überprüfen, ob der Pixel innerhalb des Bildbereichs liegt
+                        if (pixelX >= 0 && pixelX < width && pixelY >= 0 && pixelY < height)
+                        {
+                            double kernelValue = gaussian16x16_sigma15[ky + offset, kx + offset];
+                            int pixelIndex = pixelY * width + pixelX;
+                            int depthValue = depthPixels[pixelIndex].Depth;
+
+                            // Überprüfen, ob der Tiefenwert gültig ist (z.B. nicht 0 bei Kinect)
+                            if (depthValue > 0)
+                            {
+                                weightedSum += depthValue * kernelValue;
+                                validWeightSum += kernelValue;
+                            }
+                        }
+                    }
+                }
+
+                // Falls keine gültigen Werte gefunden wurden, den Originalwert übernehmen
+                int currentIndex = y * width + x;
+                if (validWeightSum > 0)
+                {
+                    smoothedPixels[currentIndex].Depth = (short)(weightedSum / validWeightSum);
+                }
+                else
+                {
+                    smoothedPixels[currentIndex].Depth = depthPixels[currentIndex].Depth;
+                }
+            }
+        }
+
+        return smoothedPixels;
+        }
+
+        // Funktion zur Erzeugung des Gaussian-Kernels
+        private double[,] GenerateGaussianKernel(int kernelSize, double sigma)
+        {
+            double[,] kernel = new double[kernelSize, kernelSize];
+            double sum = 0.0;
+
+            int offset = kernelSize / 2;
+            double sigmaSquared = 2 * sigma * sigma;
+            double piSigma = 2 * Math.PI * sigma * sigma;
+
+            // Kernel-Werte berechnen
+            for (int y = -offset; y <= offset; y++)
+            {
+                for (int x = -offset; x <= offset; x++)
+                {
+                    double exponent = -(x * x + y * y) / sigmaSquared;
+                    double value = (1 / piSigma) * Math.Exp(exponent);
+                    kernel[y + offset, x + offset] = value;
+                    sum += value;
+                }
+            }
+
+            // Normalisierung des Kernels (Summe aller Werte = 1)
+            for (int y = 0; y < kernelSize; y++)
+            {
+                for (int x = 0; x < kernelSize; x++)
+                {
+                    kernel[y, x] /= sum;
+                }
+            }
+
+            return kernel;
+        }
+        
+        
+
+
+        
         private void KinectSensor_ColorFrameReady(object sender, ColorImageFrameReadyEventArgs e)
         {
             using (var frame = e.OpenColorImageFrame())

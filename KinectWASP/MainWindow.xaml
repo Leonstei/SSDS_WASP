@@ -11,6 +11,6 @@
         <Image x:Name="KinectVideo" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
 
         <!-- Tiefenbild -->
-        <!--Image x:Name="DepthVideo" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" /-->
+        <Image x:Name="DepthVideo" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
     </Grid>
 </Window>

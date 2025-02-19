@@ -7,13 +7,12 @@ namespace KinectTest.Helper;
 public class DepthTransformation
 {
     
-    public byte[] StartDepthTransformation(short[] depthPixels, DepthImagePoint wrist, DepthImagePoint elbow)
+    public short[] StartDepthTransformation(short[] depthPixels, DepthImagePoint wrist, DepthImagePoint elbow)
     {
         
         // Beispielwerte (ersetze diese durch deine tatsächlichen Daten)
         int imageWidth = 640;  // Breite des Tiefenbildes
         int imageHeight = 480; // Höhe des Tiefenbildes
-        
         
 
         // Hand- und Ellbogenpositionen definieren (für die Rotationsmatrix)
@@ -24,7 +23,7 @@ public class DepthTransformation
         Matrix2x2 rotationMatrix = ComputeRotationMatrix(wirstPosition, elbowPosition);
 
         // Transformiere die Tiefenpixel
-        byte[] transformedDepthPixels = TransformDepthPixels(depthPixels, imageWidth, imageHeight, rotationMatrix, wirstPosition);
+        short[] transformedDepthPixels = TransformDepthPixels(depthPixels, imageWidth, imageHeight, rotationMatrix, wirstPosition);
 
         // Ausgabe des ersten transformierten Pixels zur Überprüfung
         //Console.WriteLine($"Transformiertes Pixel 0: Depth = {transformedDepthPixels[0].Depth}, IsKnownDepth = {transformedDepthPixels[0].IsKnownDepth}");
@@ -32,9 +31,9 @@ public class DepthTransformation
     }
 
     // Transformation der Tiefenpixel mit der Rotationsmatrix
-    public static byte[] TransformDepthPixels(short[] depthPixels, int width, int height, Matrix2x2 rotationMatrix, Vector2D wirstPosition)
+    public static short[] TransformDepthPixels(short[] depthPixels, int width, int height, Matrix2x2 rotationMatrix, Vector2D wirstPosition)
     {
-        //short[] transformedPixels = new short[depthPixels.Length];
+        short[] transformedPixels = new short[depthPixels.Length];
         //int  newIndexes = 0;
         byte[] newDepth = new byte[depthPixels.Length];
         
@@ -88,6 +87,7 @@ public class DepthTransformation
             // if (distanceSquared < 100)
             // {
             Vector2D originalPosition = new Vector2D(x - wirstPosition.X, y - wirstPosition.Y);
+            
 
             // Wende die Rotationsmatrix und die Translation an
             Vector2D newPosition = rotationMatrix.Multiply(originalPosition) + wirstPosition;
@@ -100,20 +100,20 @@ public class DepthTransformation
                 //newIndexes++;
                 int newIndex = (int)newPosition.Y * width + (int)newPosition.X;
                 // Übertrage den Tiefenwert auf die neue Position
-                //transformedPixels[newIndex] = depthPixels[i];
-                newDepth[newIndex] = (byte)(255 - ((depthPixels[i] - 800) * 255 / (3600 - 800)));
+                transformedPixels[newIndex] = depthPixels[i];
+                //newDepth[newIndex] = (byte)(255 - ((depthPixels[i] - 800) * 255 / (3600 - 800)));
             }
-            else
-            {
-                newDepth[i] = 0;
-            }
+            // else
+            // {
+            //     newDepth[i] = 0;
+            // }
             //}
 
         });
         //Console.WriteLine($"Anzahl der transformierten Pixel: {newIndexes}");
         //Console.WriteLine($"Rotationsmatrix: {rotationMatrix.M11}, {rotationMatrix.M12}, {rotationMatrix.M21}, {rotationMatrix.M22}");
-
-        return newDepth;
+        
+        return transformedPixels;
     }
 
     // Berechnung der Rotationsmatrix basierend auf Hand- und Ellbogenposition
@@ -123,7 +123,7 @@ public class DepthTransformation
         double b1 = direction.X;
         double b2 = direction.Y;
 
-        return new Matrix2x2(-b2, b1, -b1, -b2);
+        return new Matrix2x2(b2, -b1, b1, b2);
     }
     public static Matrix2x2 CreateRotationMatrix(Vector2D hand, Vector2D elbow)
     {

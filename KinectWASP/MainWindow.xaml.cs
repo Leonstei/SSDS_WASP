@@ -65,7 +65,7 @@ namespace KinectWASP
                 _clolorData = new byte[_kinectSensor.ColorStream.FramePixelDataLength];
                 _colorBitmap = new WriteableBitmap(640, 480, 96.0, 96.0, System.Windows.Media.PixelFormats.Bgr32, null);
                 
-
+                //KinectVideo.Source = _colorBitmap;
                 _kinectSensor.Start();
             }
         }
@@ -119,10 +119,35 @@ namespace KinectWASP
                                 //         _depthData[i] = 0;
                                 //     }
                                 // }
-
-                                //Console.WriteLine($"wristRight:{wristDepthPoint.X}elbow:{wristDepthPoint.Y}");
                                 DepthTransformation depthTransformation = new();
-                                byte[] newDepthPixels = depthTransformation.StartDepthTransformation(_depthPixels2, wristDepthPoint, elbowDepthPoint);
+                                short[] newDepthPixels = depthTransformation.StartDepthTransformation(_depthPixels2, wristDepthPoint, elbowDepthPoint);
+
+                                HandBoundingBox handBoundingBox = new(newDepthPixels);
+                                (int bLeft, int bRight, int bTop) name  = handBoundingBox.CalculateBoundingBox( wristDepthPoint,elbowDepthPoint);
+                                
+                                double[] conturPixels = handBoundingBox.FindContourPixels(wristDepthPoint.X,wristDepthPoint.Y, _depthPixels2,wristDepthPoint.Depth);
+                                double[] averageCounturPixels = handBoundingBox.MovingAverageFilter(conturPixels, 6);
+                                List<double> maxima = handBoundingBox.FindLocalMaxima(averageCounturPixels,8,0.6f);
+                                if (maxima.Count > 0)Console.WriteLine($"hand offen; gefundene Spitzen = {maxima.Count}");
+                                else Console.WriteLine("hand zu");
+                                KinectVideo.Source = handBoundingBox.DrawBoundingBoxBlack(  wristDepthPoint.Y);
+                                
+                                for (int i = 0; i < newDepthPixels.Length; i++)
+                                {
+                                    short depth = newDepthPixels[i];
+                        
+                                    if (depth >= 800 && depth <= 3600)
+                                    {
+                                        byte brightness = (byte)(255 - ((depth - 800) * 255 / (3600 - 800)));
+                                        _depthData[i] = brightness; // Helle Objekte = Nah / Dunkle Objekte = Fern
+                            
+                                    }
+                                    else
+                                    {
+                                        // Setzen Sie außerhalb des Bereichs liegende Pixel auf Schwarz (ARGB = 0)
+                                        _depthData[i] = 0;
+                                    }
+                                }
                                 BitmapSource grayscaleBitmap = BitmapSource.Create(
                                     640,
                                     480,
@@ -130,7 +155,7 @@ namespace KinectWASP
                                     96,
                                     PixelFormats.Gray8,
                                     null,
-                                    newDepthPixels,
+                                    _depthData,
                                     640
                                 );
                                 
@@ -145,8 +170,8 @@ namespace KinectWASP
                                 //     640
                                 // );
                                 //
-                                // DepthVideo.Source  = grayscaleBitmap2;
-                                KinectVideo.Source = grayscaleBitmap;
+                                DepthVideo.Source  = grayscaleBitmap;
+                                //KinectVideo.Source = grayscaleBitmap;
                                 
                             }
                             if (handRightJoint.TrackingState == JointTrackingState.Tracked)

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using KinectTest.Helper;
@@ -18,12 +19,16 @@ namespace KinectWASP
         private BitmapSource _depthBitmap;
         
         private WriteableBitmap _colorBitmap;
+        Stopwatch _timer = new Stopwatch();
         
         //storage for color data
         private byte[] _clolorData;
         
         //storage for depth data
         private byte[] _depthData;
+        private LinkedList<short> _handStates = new LinkedList<short>();
+        bool handOpen = false;
+        short handStateUnchanged = 0;
         
 
         public MainWindow()
@@ -65,7 +70,7 @@ namespace KinectWASP
                 _clolorData = new byte[_kinectSensor.ColorStream.FramePixelDataLength];
                 _colorBitmap = new WriteableBitmap(640, 480, 96.0, 96.0, System.Windows.Media.PixelFormats.Bgr32, null);
                 
-                //KinectVideo.Source = _colorBitmap;
+                // KinectVideo.Source = _colorBitmap;
                 _kinectSensor.Start();
             }
         }
@@ -87,10 +92,8 @@ namespace KinectWASP
                         // Überprüfen, ob ein Skelett verfolgt wird
                         if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
                         {
-                            // Zugriff auf Gelenkpunkte eines getrackten Skeletts
-                            //Joint headJoint = skeleton.Joints[JointType.Head];
+                            
                             Joint handRightJoint = skeleton.Joints[JointType.HandRight];
-                            //Joint handLeftJoint = skeleton.Joints[JointType.HandLeft];
                             Joint wristRightJoint = skeleton.Joints[JointType.WristRight];
                             Joint elbowRightJoint = skeleton.Joints[JointType.ElbowRight];
 
@@ -98,7 +101,6 @@ namespace KinectWASP
                                 elbowRightJoint.TrackingState == JointTrackingState.Tracked)
                             {
                                 
-                                //Console.WriteLine($"wristRight:{wristRightJoint.Position.X}elbow:{wristRightJoint.Position.Y}");
                                 SkeletonPoint wristPosition = wristRightJoint.Position;
                                 DepthImagePoint wristDepthPoint = _kinectSensor.CoordinateMapper.MapSkeletonPointToDepthPoint(
                                     wristPosition, 
@@ -109,18 +111,10 @@ namespace KinectWASP
                                     elbowPosition, 
                                     DepthImageFormat.Resolution640x480Fps30
                                 );
-                                // for (int i = 0; i < _depthPixels.Length; i++)
-                                // {
-                                //     // Berechne die (x, y)-Koordinaten des Pixels aus dem Array-Index
-                                //     int x = i % 640; // Spaltenindex
-                                //     int y = i / 640;
-                                //     if (Math.Abs(_depthPixels2[i] - wristDepthPoint.Depth) < 110)
-                                //     {
-                                //         _depthData[i] = 0;
-                                //     }
-                                // }
                                 DepthTransformation depthTransformation = new();
                                 short[] newDepthPixels = depthTransformation.StartDepthTransformation(_depthPixels2, wristDepthPoint, elbowDepthPoint);
+
+                                // _timer.Restart();
 
                                 HandBoundingBox handBoundingBox = new(newDepthPixels);
                                 (int bLeft, int bRight, int bTop) name  = handBoundingBox.CalculateBoundingBox( wristDepthPoint,elbowDepthPoint);
@@ -128,8 +122,47 @@ namespace KinectWASP
                                 double[] conturPixels = handBoundingBox.FindContourPixels(wristDepthPoint.X,wristDepthPoint.Y, _depthPixels2,wristDepthPoint.Depth);
                                 double[] averageCounturPixels = handBoundingBox.MovingAverageFilter(conturPixels, 6);
                                 List<double> maxima = handBoundingBox.FindLocalMaxima(averageCounturPixels,8,0.6f);
-                                if (maxima.Count > 0)Console.WriteLine($"hand offen; gefundene Spitzen = {maxima.Count}");
-                                else Console.WriteLine("hand zu");
+                                // _timer.Stop();
+                                // Console.WriteLine($"Time spend: {_timer.ElapsedTicks} ms");
+                                // if (maxima.Count > 0)
+                                // {
+                                //     if (handOpen)
+                                //     {
+                                //         handStateUnchanged++;
+                                //         if (handStateUnchanged == 3)
+                                //         {
+                                //             handOpen = !handOpen;
+                                //             Console.WriteLine($"hand offen; gefundene Spitzen = {maxima.Count}");
+                                //         }
+                                //     }else handStateUnchanged = 1;
+                                // }
+                                // else if(handOpen) handStateUnchanged = 1;
+                                // else if (!handOpen)
+                                // {
+                                //     handStateUnchanged++;
+                                //     if (handStateUnchanged == 3)
+                                //     {
+                                //         handOpen = !handOpen;
+                                //         Console.WriteLine("hand zu");
+                                //     }
+                                // }
+                                if (maxima.Count > 1) _handStates.AddLast(1);
+                                else _handStates.AddLast(0);
+                                if(_handStates.Count>3) _handStates.RemoveFirst();
+                                if (_handStates.Count == 3 &&
+                                    _handStates.First.Value == _handStates.First.Next.Value &&
+                                    _handStates.First.Value == _handStates.Last.Value && _handStates.First.Value == 1)
+                                {
+                                    handOpen = true;
+                                    Console.WriteLine($"hand offen");
+                                }else if (_handStates.Count == 3 &&
+                                          _handStates.First.Value == _handStates.First.Next.Value &&
+                                          _handStates.First.Value == _handStates.Last.Value && _handStates.First.Value == 0)
+                                {
+                                    handOpen = false;
+                                    Console.WriteLine($"hand zu");
+                                }
+                                
                                 KinectVideo.Source = handBoundingBox.DrawBoundingBoxBlack(  wristDepthPoint.Y);
                                 
                                 for (int i = 0; i < newDepthPixels.Length; i++)
@@ -144,7 +177,6 @@ namespace KinectWASP
                                     }
                                     else
                                     {
-                                        // Setzen Sie außerhalb des Bereichs liegende Pixel auf Schwarz (ARGB = 0)
                                         _depthData[i] = 0;
                                     }
                                 }
@@ -268,7 +300,6 @@ namespace KinectWASP
                         }
                         else
                         {
-                            // Setzen Sie außerhalb des Bereichs liegende Pixel auf Schwarz (ARGB = 0)
                             _depthData[i] = 0;
                         }
                         

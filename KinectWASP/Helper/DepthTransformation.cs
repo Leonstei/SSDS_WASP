@@ -34,48 +34,7 @@ public class DepthTransformation
     public static short[] TransformDepthPixels(short[] depthPixels, int width, int height, Matrix2x2 rotationMatrix, Vector2D wirstPosition)
     {
         short[] transformedPixels = new short[depthPixels.Length];
-        //int  newIndexes = 0;
-        byte[] newDepth = new byte[depthPixels.Length];
-        
-        // for (int i = 0; i < depthPixels.Length; i++)
-        // {
-        //     int x = i % width;        // Spaltenindex
-        //     int y = i / width; 
-        //     Vector2D originalPosition = new Vector2D(x, y);
-        //     Vector2D newPosition = rotationMatrix.Multiply(originalPosition) + translation;
-        //     // if (originalPosition.X == translation.X && originalPosition.Y == translation.Y)
-        //     // {
-        //     //     newWristPosition = newPosition;
-        //     // }
-        //     if (Math.Abs(newPosition.X - translation.X) + Math.Abs(newPosition.Y - translation.Y) < 200)
-        //     {
-        //         positions.Add(newPosition);
-        //         //Console.WriteLine($"neue Position : {newPosition.X}, {newPosition.Y}");
-        //         if(newPosition.X > maxpositionX) maxpositionX = newPosition.X;
-        //         if(newPosition.Y > maxpositionY) maxpositionY = newPosition.Y;
-        //         if(newPosition.X < minpositionX) minpositionX = newPosition.X;
-        //         if(newPosition.Y < minpositionY) minpositionY = newPosition.Y;
-        //     }
-        //     
-        // }
-        // double offsetX = (minpositionX < 0) ? -minpositionX : 0;
-        // double offsetY = (minpositionY < 0) ? -minpositionY : 0;
-        // var adjustedPositions = positions.Select(p => new Vector2D(p.X + offsetX, p.Y + offsetY)).ToList();
-        //
-        // for (int i = 0; i < positions.Count; i++)
-        // {
-        //     if (adjustedPositions[i].X >= 0 && adjustedPositions[i].X < width && adjustedPositions[i].Y >= 0 && adjustedPositions[i].Y < height)
-        //     {
-        //         int newIndex = (int)adjustedPositions[i].Y * width + (int)adjustedPositions[i].X;
-        //         // Übertrage den Tiefenwert auf die neue Position
-        //         transformedPixels[newIndex] = depthPixels[i];
-        //         newDepth[newIndex] = (byte)(255 - ((depthPixels[i] - 800) * 255 / (3600 - 800)));
-        //     }
-        //     else
-        //     {
-        //         newDepth[i] = 0;
-        //     }
-        // }
+        // byte[] newDepth = new byte[depthPixels.Length];
 
         Parallel.For(0, depthPixels.Length, i =>
         {

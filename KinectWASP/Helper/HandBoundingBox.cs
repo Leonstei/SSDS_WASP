@@ -77,7 +77,7 @@ public class HandBoundingBox
             if (!found) break;
         }
 
-        Console.WriteLine($"bLeft = {bLeft} bRight = {bRight} bTop = {bTop} distTop = {wristPosition.Y-bTop} wristY = {wristPosition.Y}");
+        // Console.WriteLine($"bLeft = {bLeft} bRight = {bRight} bTop = {bTop} distTop = {wristPosition.Y-bTop} wristY = {wristPosition.Y}");
         return (bLeft, bRight, bTop);
     }
 
@@ -98,7 +98,7 @@ public class HandBoundingBox
         if (bTop > 480) bTop = 480;
         if (wristY < 0) wristY = 0;
             
-        Console.WriteLine($"bLeft = {bLeft} bRight = {bRight} bTop = {bTop} bBottom = {wristY} wristY = {wristY} ");
+        // Console.WriteLine($"bLeft = {bLeft} bRight = {bRight} bTop = {bTop} bBottom = {wristY} wristY = {wristY} ");
         bitmap.Lock();
         for (int u = bLeft; u <= bRight; u++)
         {

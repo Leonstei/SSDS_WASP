@@ -1,0 +1,115 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\R. Jehle\\OneDrive - ProVita Alltagsassistenz Deutschland GmbH\\Desktop\\TH K\u00F6ln\\SSDS_WASP\\KinectWASP\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|c:\\users\\r. jehle\\onedrive - provita alltagsassistenz deutschland gmbh\\desktop\\th k\u00F6ln\\ssds_wasp\\kinectwasp\\kinectwasp\\helper\\datasaver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|solutionrelative:kinectwasp\\helper\\datasaver.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|c:\\users\\r. jehle\\onedrive - provita alltagsassistenz deutschland gmbh\\desktop\\th k\u00F6ln\\ssds_wasp\\kinectwasp\\kinectwasp\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|solutionrelative:kinectwasp\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\R. Jehle\\.nuget\\packages\\epplus\\7.6.0\\readme.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|c:\\users\\r. jehle\\onedrive - provita alltagsassistenz deutschland gmbh\\desktop\\th k\u00F6ln\\ssds_wasp\\kinectwasp\\kinectwasp\\helper\\handboundingbox.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|solutionrelative:kinectwasp\\helper\\handboundingbox.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|c:\\users\\r. jehle\\onedrive - provita alltagsassistenz deutschland gmbh\\desktop\\th k\u00F6ln\\ssds_wasp\\kinectwasp\\kinectwasp\\helper\\depthtransformation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|solutionrelative:kinectwasp\\helper\\depthtransformation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|c:\\users\\r. jehle\\onedrive - provita alltagsassistenz deutschland gmbh\\desktop\\th k\u00F6ln\\ssds_wasp\\kinectwasp\\kinectwasp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{51A2191D-5EF9-4968-BC35-7B5694602A16}|KinectWASP\\KinectWASP.csproj|solutionrelative:kinectwasp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 3,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "HandBoundingBox.cs",
+              "DocumentMoniker": "C:\\Users\\R. Jehle\\OneDrive - ProVita Alltagsassistenz Deutschland GmbH\\Desktop\\TH K\u00F6ln\\SSDS_WASP\\KinectWASP\\KinectWASP\\Helper\\HandBoundingBox.cs",
+              "RelativeDocumentMoniker": "KinectWASP\\Helper\\HandBoundingBox.cs",
+              "ToolTip": "C:\\Users\\R. Jehle\\OneDrive - ProVita Alltagsassistenz Deutschland GmbH\\Desktop\\TH K\u00F6ln\\SSDS_WASP\\KinectWASP\\KinectWASP\\Helper\\HandBoundingBox.cs",
+              "RelativeToolTip": "KinectWASP\\Helper\\HandBoundingBox.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAIAwwAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-26T10:28:47.132Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "readme.txt",
+              "DocumentMoniker": "C:\\Users\\R. Jehle\\.nuget\\packages\\epplus\\7.6.0\\readme.txt",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\.nuget\\packages\\epplus\\7.6.0\\readme.txt",
+              "ToolTip": "C:\\Users\\R. Jehle\\.nuget\\packages\\epplus\\7.6.0\\readme.txt",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\.nuget\\packages\\epplus\\7.6.0\\readme.txt",
+              "ViewState": "AgIAAD8AAAAAAAAAAAAAAGEAAABYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
+              "WhenOpened": "2025-02-26T11:48:29.557Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\R. Jehle\\OneDrive - ProVita Alltagsassistenz Deutschland GmbH\\Desktop\\TH K\u00F6ln\\SSDS_WASP\\KinectWASP\\KinectWASP\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "KinectWASP\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\R. Jehle\\OneDrive - ProVita Alltagsassistenz Deutschland GmbH\\Desktop\\TH K\u00F6ln\\SSDS_WASP\\KinectWASP\\KinectWASP\\MainWindow.xaml.cs",
+              "RelativeToolTip": "KinectWASP\\MainWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQBAABFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-25T16:14:45.771Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DataSaver.cs",
+              "DocumentMoniker": "C:\\Users\\R. Jehle\\OneDrive - ProVita Alltagsassistenz Deutschland GmbH\\Desktop\\TH K\u00F6ln\\SSDS_WASP\\KinectWASP\\KinectWASP\\Helper\\DataSaver.cs",
+              "RelativeDocumentMoniker": "KinectWASP\\Helper\\DataSaver.cs",
+              "ToolTip": "C:\\Users\\R. Jehle\\OneDrive - ProVita Alltagsassistenz Deutschland GmbH\\Desktop\\TH K\u00F6ln\\SSDS_WASP\\KinectWASP\\KinectWASP\\Helper\\DataSaver.cs",
+              "RelativeToolTip": "KinectWASP\\Helper\\DataSaver.cs",
+              "ViewState": "AgIAADkAAAAAAAAAAAAAwEwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-26T11:24:48.561Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "DepthTransformation.cs",
+              "DocumentMoniker": "C:\\Users\\R. Jehle\\OneDrive - ProVita Alltagsassistenz Deutschland GmbH\\Desktop\\TH K\u00F6ln\\SSDS_WASP\\KinectWASP\\KinectWASP\\Helper\\DepthTransformation.cs",
+              "RelativeDocumentMoniker": "KinectWASP\\Helper\\DepthTransformation.cs",
+              "ToolTip": "C:\\Users\\R. Jehle\\OneDrive - ProVita Alltagsassistenz Deutschland GmbH\\Desktop\\TH K\u00F6ln\\SSDS_WASP\\KinectWASP\\KinectWASP\\Helper\\DepthTransformation.cs",
+              "RelativeToolTip": "KinectWASP\\Helper\\DepthTransformation.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAKUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-26T11:03:43.572Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\R. Jehle\\OneDrive - ProVita Alltagsassistenz Deutschland GmbH\\Desktop\\TH K\u00F6ln\\SSDS_WASP\\KinectWASP\\KinectWASP\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "KinectWASP\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\R. Jehle\\OneDrive - ProVita Alltagsassistenz Deutschland GmbH\\Desktop\\TH K\u00F6ln\\SSDS_WASP\\KinectWASP\\KinectWASP\\MainWindow.xaml",
+              "RelativeToolTip": "KinectWASP\\MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-02-25T16:14:36.13Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

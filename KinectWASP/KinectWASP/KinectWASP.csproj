@@ -2,23 +2,22 @@
 
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net481</TargetFramework>
+        <TargetFramework>net48</TargetFramework>
         <LangVersion>10.0</LangVersion>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
         <RootNamespace>KinectTest</RootNamespace>
-        <PlatformTarget>x64</PlatformTarget>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Emgu.CV" Version="4.10.0.5680" />
-      <PackageReference Include="Emgu.CV.runtime.windows" Version="4.10.0.5680" />
+      <PackageReference Include="EPPlus" Version="7.6.0" />
+      <PackageReference Include="EPPlus.System.Drawing" Version="8.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <Reference Include="Microsoft.Kinect">
-        <HintPath>..\..\..\..\..\Program Files\Microsoft SDKs\Kinect\v1.8\Assemblies\Microsoft.Kinect.dll</HintPath>
+        <HintPath>..\..\..\..\..\..\..\..\Program Files\Microsoft SDKs\Kinect\v1.8\Assemblies\Microsoft.Kinect.dll</HintPath>
       </Reference>
     </ItemGroup>
 

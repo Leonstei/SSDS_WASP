@@ -1,0 +1,18 @@
+﻿<Window x:Class="KinectWASP.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Kinect App" Width="640" Height="480"
+        KeyDown="MainWindow_KeyDown">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- RGB Bild -->
+        <Image x:Name="KinectVideo" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+
+        <!-- Tiefenbild -->
+        <Image x:Name="DepthVideo" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+    </Grid>
+</Window>

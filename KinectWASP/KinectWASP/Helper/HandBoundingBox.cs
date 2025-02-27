@@ -135,21 +135,21 @@ public class HandBoundingBox
         //     else if ((i + 1) % width == 0) depthData[i] = 0;
         //     else depthData[i] = 255;
         // }
-        //
         // foreach (var point in _conturPoints)
         // {
-        //     int u = (int)point.X - bLeft;
-        //     int v = (int)point.Y - wristY;
+        //     int u = (int)point.X  -bLeft  ;
+        //     int v = (int)point.Y -wristY; ;
         //     int index = v * width + u;
-        //     if (u >= 0 && u <= width && v >= 0 && v <= height)
+        //     if (u >= 0 && u <= width && v >= 0 && v <= height )
         //     {
         //         depthData[index] = 0;
         //     }
-        //     else
-        //     {
-        //         Console.WriteLine($"u = {u}; v = {v}; index = {index}");
-        //     }
+        //     // else
+        //     // {
+        //     //     Console.WriteLine($"u = {u}; v = {v}; index = {index}");
+        //     // }
         // }
+        
         int width = 640;
         int height = 480;
         byte[] depthData = new byte[width * height];
@@ -318,5 +318,43 @@ public class HandBoundingBox
         }
         // Console.WriteLine("kein handPixel gefunden");
         return 0.0;
+    }
+
+    public BitmapSource  DrawHandpixelInBoundingBox( int wristY, int wristDepth)
+    {
+        if (bLeft < 0) bLeft = 0;
+        if ( bRight > 640) bRight = 640;
+        if (bTop > 480) bTop = 480;
+        if (wristY < 0) wristY = 0;
+        if (bLeft >= bRight || wristY >= bTop)
+            return null;
+        
+        short width = (short)(bRight - bLeft+1);
+        short height = (short)(bTop - wristY+1);
+        byte[] depthData = new byte[width * height];
+        
+        for (int i = 0; i < depthData.Length; i++)
+        {
+            int x = (i % width) + bLeft;
+            int y = (i / width) + wristY;
+            if (Math.Abs(GetDepth(x, y) - wristDepth) < Threshold) depthData[i] = 0;
+            else if (i < width) depthData[i] = 0;
+            else if(i >= depthData.Length-width) depthData[i] = 0;
+            else if (i % width == 0) depthData[i] = 0;
+            else if ((i + 1) % width == 0) depthData[i] = 0;
+            else depthData[i] = 255;
+        }   
+        
+        BitmapSource grayscaleBitmap = BitmapSource.Create(
+            width,
+            height,
+            96,
+            96,
+            PixelFormats.Gray8,
+            null,
+            depthData,
+            width
+        );
+        return grayscaleBitmap; 
     }
 }

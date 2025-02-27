@@ -39,6 +39,7 @@ namespace KinectWASP
         private double[] _lastAverageContourPixels;
         private List<(int,double)> _lastMaxima;
         private BitmapSource _lastContourImage;
+        private BitmapSource _lastHandPixelImage;
 
 
 
@@ -51,9 +52,57 @@ namespace KinectWASP
             MouseDown += Button_Click;
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, MouseEventArgs e)
         {
-            
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                // 1) Prüfen, ob wir überhaupt schon Daten haben
+                if (_lastContourPixels == null || _lastAverageContourPixels == null || _lastMaxima == null)
+                {
+                    MessageBox.Show("Noch keine Hand-Daten erfasst!");
+                    return;
+                }
+
+                // 2) Zuerst Hand-Daten speichern (CSV + Kontur-PNG), 
+                //    wie im vorherigen Beispiel. Wir nehmen an, du hast
+                //    eine DataSaver-Klasse mit SaveHandData(...).
+                DataSaver.SaveHandDataToExcelWithChart(
+                    isHandOpen: _lastHandOpen,
+                    boundingBox: _lastBoundingBox,
+                    contourPixels: _lastContourPixels,
+                    averageContourPixels: _lastAverageContourPixels,
+                    maxima: _lastMaxima,
+                    contourImage: _lastContourImage, // aus HandBoundingBox.DrawBoundingBoxBlack
+                    handPixelImage : _lastHandPixelImage
+                );
+
+                // 3) Screenshot des ganzen Fensters erstellen und speichern.
+                //    Wir verwenden RenderTargetBitmap.
+                string folderName = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                string folderPath = System.IO.Path.Combine("Recordings", folderName);
+                System.IO.Directory.CreateDirectory(folderPath);
+
+                var rtb = new RenderTargetBitmap(
+                    (int)this.ActualWidth,
+                    (int)this.ActualHeight,
+                    96,
+                    96,
+                    PixelFormats.Pbgra32
+                );
+                rtb.Render(this); // "this" = ganzes Window
+
+                // Als PNG codieren und schreiben
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(rtb));
+                string screenshotPath = System.IO.Path.Combine(folderPath, "Screenshot.png");
+                using (var fs = new FileStream(screenshotPath, FileMode.Create))
+                {
+                    encoder.Save(fs);
+                }
+
+                MessageBox.Show($"Hand-Daten und Screenshot gespeichert in:\n{folderPath}");
+                
+            }
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -145,8 +194,7 @@ namespace KinectWASP
                                 List<(int Index, double Value)> maximaPoints =
                                     handBoundingBox.FindLocalMaximaWithIndices(averageContourPixels, 8, 0.6f);
 
-                                // 4) Hand offen oder zu? (deine Logik)
-                                //    Du hast zusätzlich eine State-Machine mit _handStates. Hier nur ein Beispiel:
+                                // 4) Hand offen oder zu? 
                                 if (maximaPoints.Count > 1)
                                     _handStates.AddLast(1);
                                 else
@@ -200,6 +248,8 @@ namespace KinectWASP
                                     640
                                 );
                                 DepthVideo.Source = grayscaleBitmap;
+                                BitmapSource handpixelInBoundingBox = handBoundingBox.DrawHandpixelInBoundingBox(wristDepthPoint.Y,wristDepthPoint.Depth);
+                                    
 
                                 // 7) Felder für späteres CSV/Bild-Speichern aktualisieren
                                 _lastHandOpen = handOpen;             // bool
@@ -208,6 +258,8 @@ namespace KinectWASP
                                 _lastAverageContourPixels = averageContourPixels; // double[]
                                 _lastMaxima = maximaPoints;                  // List<double>
                                 _lastContourImage = contourBitmap;     // BitmapSource
+                                _lastHandPixelImage = handpixelInBoundingBox;       // BitmapSource
+                                
                             }
                         }
                     }
@@ -299,7 +351,8 @@ namespace KinectWASP
                     contourPixels: _lastContourPixels,
                     averageContourPixels: _lastAverageContourPixels,
                     maxima: _lastMaxima,
-                    contourImage: _lastContourImage // aus HandBoundingBox.DrawBoundingBoxBlack
+                    contourImage: _lastContourImage, // aus HandBoundingBox.DrawBoundingBoxBlack
+                    handPixelImage : _lastHandPixelImage
                 );
 
                 // 3) Screenshot des ganzen Fensters erstellen und speichern.

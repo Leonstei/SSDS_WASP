@@ -17,7 +17,8 @@ namespace KinectWASP
             double[] contourPixels,
             double[] averageContourPixels,
             List<(int Index, double Value)> maxima,  // Enthält Index und Maxima-Wert
-            BitmapSource contourImage
+            BitmapSource contourImage,
+            BitmapSource handPixelImage
         )
         {
             // EPPlus ab Version 5 erfordert das Setzen des LicenseContext
@@ -25,13 +26,14 @@ namespace KinectWASP
 
             // 1) Ordner mit Zeitstempel anlegen
             string folderName = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            string folderPath = Path.Combine("Recordings", folderName);
+            string folderPath = Path.Combine("Recordings", folderName); 
+            Console.WriteLine($" current = {Directory.GetCurrentDirectory()}\\{folderPath}");
             Directory.CreateDirectory(folderPath);
 
             // 2) Neues Excel-Package und Worksheet erstellen
             using (var package = new ExcelPackage())
             {
-                var ws = package.Workbook.Worksheets.Add("HandData");
+                var ws = package.Workbook.Worksheets.Add("HandData" + folderName);
 
                 // 3) Metadaten (Timestamp, Handstatus, BoundingBox) oben in die Tabelle
                 ws.Cells["A1"].Value = "Timestamp";
@@ -137,6 +139,12 @@ namespace KinectWASP
             {
                 string imagePath = Path.Combine(folderPath, "handContour.png");
                 SaveBitmapSourceAsPng(contourImage, imagePath);
+            }
+            // 10) Konturbild (falls vorhanden) als PNG speichern
+            if (handPixelImage != null)
+            {
+                string imagePath = Path.Combine(folderPath, "handPixelImage.png");
+                SaveBitmapSourceAsPng(handPixelImage, imagePath);
             }
         }
 

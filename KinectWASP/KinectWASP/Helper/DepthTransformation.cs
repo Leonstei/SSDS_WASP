@@ -26,7 +26,6 @@ public class DepthTransformation
         short[] transformedDepthPixels = TransformDepthPixels(depthPixels, imageWidth, imageHeight, rotationMatrix, wirstPosition);
 
         // Ausgabe des ersten transformierten Pixels zur Überprüfung
-        //Console.WriteLine($"Transformiertes Pixel 0: Depth = {transformedDepthPixels[0].Depth}, IsKnownDepth = {transformedDepthPixels[0].IsKnownDepth}");
         return transformedDepthPixels;
     }
 

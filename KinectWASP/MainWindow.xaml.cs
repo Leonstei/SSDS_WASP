@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -9,155 +12,81 @@ namespace KinectWASP
     public partial class MainWindow : Window
     {
         private KinectSensor _kinectSensor;
-        
-        //Intermediate storage for the depth data received from the camera 
+
+        // Tiefendaten
         private DepthImagePixel[] _depthPixels;
-        
-        //Bitmap that will hold depth information
-        private BitmapSource _depthBitmap;
-        
-        private WriteableBitmap _colorBitmap;
-        
-        //storage for color data
-        private byte[] _clolorData;
-        
-        //storage for depth data
         private byte[] _depthData;
-        
+
+        // Ob die Ausgabe gerade pausiert ist
+        private bool _isPaused = false;
+
+        // Für die Rechteck-Auswahl
+        private Point? _selectionStart = null;
+
         public MainWindow()
         {
             InitializeComponent();
             Loaded += MainWindow_Loaded;
             Closing += MainWindow_Closing;
-            MouseDown += OnMouseDown;
         }
-        
+
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            _kinectSensor = KinectSensor.KinectSensors.FirstOrDefault(x => x.Status == KinectStatus.Connected);
+            // Kinect suchen und starten
+            _kinectSensor = KinectSensor.KinectSensors.FirstOrDefault(s => s.Status == KinectStatus.Connected);
             if (_kinectSensor != null)
             {
-                _kinectSensor.SkeletonStream.Enable();
+                // Nur Tiefenstream aktivieren (640x480)
                 _kinectSensor.DepthStream.Enable(DepthImageFormat.Resolution640x480Fps30);
-                _kinectSensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
-                _kinectSensor.ColorFrameReady += KinectSensor_ColorFrameReady;
                 _kinectSensor.DepthFrameReady += KinectSensor_DepthFrameReady;
-                _kinectSensor.SkeletonFrameReady += KinectSensor_SkeletonFrameReady;
-                
+
+                // Arrays für Pixel-Daten anlegen
                 _depthPixels = new DepthImagePixel[_kinectSensor.DepthStream.FramePixelDataLength];
-
-                _depthData = new byte[_kinectSensor.DepthStream.FramePixelDataLength * sizeof(int)]; 
-                
-                _depthBitmap = BitmapSource.Create(
-                    _kinectSensor.DepthStream.FrameWidth, _kinectSensor.DepthStream.FrameHeight, 96.0, 96.0, 
-                    PixelFormats.Gray8, null, _depthData, _kinectSensor.DepthStream.FrameWidth );
-                DepthVideo.Source = _depthBitmap;
-
-                _clolorData = new byte[_kinectSensor.ColorStream.FramePixelDataLength];
-                _colorBitmap = new WriteableBitmap(640, 480, 96.0, 96.0, System.Windows.Media.PixelFormats.Bgr32, null);
-                KinectVideo.Source = _colorBitmap;
+                _depthData = new byte[_kinectSensor.DepthStream.FramePixelDataLength];
 
                 _kinectSensor.Start();
-            }
-        }
-        
-        private void KinectSensor_SkeletonFrameReady(object sender, SkeletonFrameReadyEventArgs e)
-        {
-            using (SkeletonFrame skeletonFrame = e.OpenSkeletonFrame())
-            {
-                if (skeletonFrame != null)
-                {
-                    // Speicherplatz für Skeleton-Daten bereitstellen
-                    Skeleton[] skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
-
-                    // Skeleton-Daten extrahieren
-                    skeletonFrame.CopySkeletonDataTo(skeletons);
-
-                    // Verarbeitung aller erkannten Skeletts
-                    foreach (Skeleton skeleton in skeletons)
-                    {
-                        // Überprüfen, ob ein Skelett verfolgt wird
-                        if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
-                        {
-                            // Zugriff auf Gelenkpunkte eines getrackten Skeletts
-                            Joint headJoint = skeleton.Joints[JointType.Head];
-                            Joint handRightJoint = skeleton.Joints[JointType.HandRight];
-                            Joint handLeftJoint = skeleton.Joints[JointType.HandLeft];
-                            Joint wristRightJoint = skeleton.Joints[JointType.WristRight];
-                            
-
-                            if (handRightJoint.TrackingState == JointTrackingState.Tracked)
-                            {
-                                //Console.WriteLine($"Rechte Hand: X={handRightJoint.Position.X}, Y={handRightJoint.Position.Y}, Z={handRightJoint.Position.Z}");
-                            }
-                            if (wristRightJoint.TrackingState == JointTrackingState.Tracked)
-                            {
-                                Console.WriteLine($"Rechte wrist: X={wristRightJoint.Position.X}, Y={wristRightJoint.Position.Y}, Z={wristRightJoint.Position.Z}");
-                            }
-                            
-                            // if (handLeftJoint.TrackingState == JointTrackingState.Tracked)
-                            // {
-                            //     Console.WriteLine($"Linke Hand: X={handLeftJoint.Position.X}, Y={handLeftJoint.Position.Y}, Z={handLeftJoint.Position.Z}");
-                            // }
-                        }
-                    }
-                }
             }
         }
 
         private void KinectSensor_DepthFrameReady(object sender, DepthImageFrameReadyEventArgs e)
         {
+            // Falls pausiert, keine Aktualisierung
+            if (_isPaused) return;
+
             using (DepthImageFrame depthFrame = e.OpenDepthImageFrame())
             {
                 if (depthFrame != null)
                 {
-                    // Copy the pixel data from the image to a temporary array
                     depthFrame.CopyDepthImagePixelDataTo(_depthPixels);
-                    
-                    // Get the min and max reliable depth for the current frame
-                    int minDepth = depthFrame.MinDepth;
-                    int maxDepth = 3600;
-                    
-                    for (int i = 0; i < _depthPixels.Length; ++i)
-                    {
-                        // Get the depth for this pixel
-                        short depth = _depthPixels[i].Depth;
 
+                    int minDepth = depthFrame.MinDepth; // normal: 800
+                    int maxDepth = 3600;                // z.B. 3.6 m
+
+                    for (int i = 0; i < _depthPixels.Length; i++)
+                    {
+                        short depth = _depthPixels[i].Depth;
                         if (depth >= minDepth && depth <= maxDepth)
                         {
-                            byte brightness = (byte)(255 - ((depth - minDepth) * 255 / (maxDepth - minDepth)));
-                            _depthData[i] = brightness; // Helle Objekte = Nah / Dunkle Objekte = Fern
+                            // Grau-Skalierung: nahe Objekte heller, entfernte dunkler
+                            byte intensity = (byte)(255 - ((depth - minDepth) * 255 / (maxDepth - minDepth)));
+                            _depthData[i] = intensity;
                         }
                         else
                         {
-                            // Setzen Sie außerhalb des Bereichs liegende Pixel auf Schwarz (ARGB = 0)
                             _depthData[i] = 0;
                         }
                     }
-                    BitmapSource grayscaleBitmap = BitmapSource.Create(
-                        depthFrame.Width,
-                        depthFrame.Height,
-                        96,
-                        96,
+
+                    // Graustufen-Bild erzeugen
+                    var bitmap = BitmapSource.Create(
+                        depthFrame.Width, depthFrame.Height,
+                        96, 96,
                         PixelFormats.Gray8,
                         null,
                         _depthData,
-                        depthFrame.Width
-                    );
-                    DepthVideo.Source  = grayscaleBitmap;
-                }
-                
-            }
-        }
+                        depthFrame.Width);
 
-        private void KinectSensor_ColorFrameReady(object sender, ColorImageFrameReadyEventArgs e)
-        {
-            using (var frame = e.OpenColorImageFrame())
-            {
-                if (frame != null)
-                {
-                    frame.CopyPixelDataTo(_clolorData);
-                    _colorBitmap.WritePixels(new Int32Rect(0, 0, frame.Width, frame.Height), _clolorData, frame.Width * 4, 0);
+                    DepthVideo.Source = bitmap;
                 }
             }
         }
@@ -169,66 +98,125 @@ namespace KinectWASP
                 _kinectSensor.Stop();
             }
         }
-        private void OnMouseDown(object sender, MouseEventArgs e)
+
+        // ---------------------------------------
+        //  Leertaste: Pause / Fortsetzen
+        // ---------------------------------------
+        private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (e.Key == Key.Space)
             {
-                // Position des Mausklicks relativ zum Fenster
-                Point clickPosition = e.GetPosition(this);
+                _isPaused = !_isPaused;
 
-                // Prüfen, ob die Klickposition im Bereich des Bildes liegt
-                if (KinectVideo != null && KinectVideo.Source is WriteableBitmap bitmap)
+                if (_isPaused)
                 {
-                    // Position relativ zur Quelle des WriteableBitmap
-                    var transform = KinectVideo.TransformToAncestor(this);
-                    Point relativePosition = transform.Transform(new Point(0, 0));
-
-                    // Berechnung der Position im Bild (relativ zum "Bitmap-Bereich")
-                    int x = (int)(clickPosition.X - relativePosition.X);
-                    int y = (int)(clickPosition.Y - relativePosition.Y);
-
-                    // Sicherstellen, dass die Position innerhalb des Bildbereichs liegt
-                    if (x >= 0 && x < bitmap.PixelWidth && y >= 0 && y < bitmap.PixelHeight)
-                    {
-                        // Indizierung des Pixel-Formats: BGR32 -> 4 Bytes pro Pixel
-                        int bytesPerPixel = 4;
-                        int pixelIndex = (y * bitmap.PixelWidth + x) * bytesPerPixel;
-
-                        // Farbwerte aus dem Buffer extrahieren
-                        byte blue = _clolorData[pixelIndex];
-                        byte green = _clolorData[pixelIndex + 1];
-                        byte red = _clolorData[pixelIndex + 2];
-
-                        // RGB-Werte in der Konsole ausgeben
-                        Console.WriteLine($"RGB-Wert bei Klickposition ({x}, {y}): R={red}, G={green}, B={blue}");
-                    }
+                    CalculationText.Text = "Pausiert – bitte Rechteck ziehen, um Tiefe zu berechnen.";
+                    CalculationText.Visibility = Visibility.Visible;
                 }
-                if (DepthVideo != null && DepthVideo.Source is BitmapSource depthBitmap)
+                else
                 {
-                    // Position relativ zur Quelle des BitmapSource
-                    var transform = DepthVideo.TransformToAncestor(this);
-                    Point relativePosition = transform.Transform(new Point(0, 0));
+                    // Fortsetzen: Rechteck & Text ausblenden
+                    SelectionRectangle.Visibility = Visibility.Collapsed;
+                    CalculationText.Visibility = Visibility.Collapsed;
+                    _selectionStart = null;
+                }
+            }
+        }
 
-                    // Berechnung der Position im Bild (relativ zur "BitmapGröße")
-                    int x = (int)(clickPosition.X - relativePosition.X);
-                    int y = (int)(clickPosition.Y - relativePosition.Y);
+        // ---------------------------------------
+        //  Rechteck-Auswahl per Maus
+        // ---------------------------------------
+        private void DepthCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (_isPaused)
+            {
+                _selectionStart = e.GetPosition(DepthCanvas);
 
-                    // Sicherstellen, dass die Position innerhalb des Bildbereichs liegt
-                    if (x >= 0 && x < depthBitmap.PixelWidth && y >= 0 && y < depthBitmap.PixelHeight)
+                // Rechteck initialisieren
+                Canvas.SetLeft(SelectionRectangle, _selectionStart.Value.X);
+                Canvas.SetTop(SelectionRectangle, _selectionStart.Value.Y);
+                SelectionRectangle.Width = 0;
+                SelectionRectangle.Height = 0;
+                SelectionRectangle.Visibility = Visibility.Visible;
+            }
+        }
+
+        private void DepthCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_isPaused && _selectionStart.HasValue && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Point currentPos = e.GetPosition(DepthCanvas);
+
+                double x = Math.Min(currentPos.X, _selectionStart.Value.X);
+                double y = Math.Min(currentPos.Y, _selectionStart.Value.Y);
+                double width = Math.Abs(currentPos.X - _selectionStart.Value.X);
+                double height = Math.Abs(currentPos.Y - _selectionStart.Value.Y);
+
+                Canvas.SetLeft(SelectionRectangle, x);
+                Canvas.SetTop(SelectionRectangle, y);
+                SelectionRectangle.Width = width;
+                SelectionRectangle.Height = height;
+            }
+        }
+
+        private void DepthCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isPaused && _selectionStart.HasValue)
+            {
+                Point endPos = e.GetPosition(DepthCanvas);
+
+                double x = Math.Min(endPos.X, _selectionStart.Value.X);
+                double y = Math.Min(endPos.Y, _selectionStart.Value.Y);
+                double width = Math.Abs(endPos.X - _selectionStart.Value.X);
+                double height = Math.Abs(endPos.Y - _selectionStart.Value.Y);
+
+                // In "Pixel-Koordinaten" umwandeln (1:1, da Image = 640x480)
+                int startX = (int)x;
+                int startY = (int)y;
+                int rectWidth = (int)width;
+                int rectHeight = (int)height;
+
+                // Bildgröße: 640x480
+                const int imageWidth = 640;
+                const int imageHeight = 480;
+
+                // Begrenzen auf Bildbereich
+                if (startX < 0) startX = 0;
+                if (startY < 0) startY = 0;
+                if (startX + rectWidth > imageWidth) rectWidth = imageWidth - startX;
+                if (startY + rectHeight > imageHeight) rectHeight = imageHeight - startY;
+
+                // Durchschnittstiefe berechnen
+                long sum = 0;
+                int count = 0;
+
+                for (int row = startY; row < startY + rectHeight; row++)
+                {
+                    for (int col = startX; col < startX + rectWidth; col++)
                     {
-                        // Berechnen des Indexes im Tiefen-Array
-                        int pixelIndex = y * depthBitmap.PixelWidth + x;
-
-                        // Tiefe von _depthPixels extrahieren
-                        if (_depthPixels != null && pixelIndex < _depthPixels.Length)
+                        int index = row * imageWidth + col;
+                        if (_depthPixels != null && index < _depthPixels.Length)
                         {
-                            short depthValue = _depthPixels[pixelIndex].Depth;
-
-                            // Tiefe des Pixels in der Konsole ausgeben
-                            Console.WriteLine($"Tiefe bei Klickposition ({x}, {y}): {depthValue} Millimeter");
+                            short depthVal = _depthPixels[index].Depth;
+                            if (depthVal > 0)  // 0 = außerhalb Min/Max oder kein gültiger Wert
+                            {
+                                sum += depthVal;
+                                count++;
+                            }
                         }
                     }
                 }
+
+                double avgDepth = (count > 0) ? sum / (double)count : 0.0;
+
+                // Ergebnis anzeigen
+                CalculationText.Text =
+                    $"Rechteck: [{startX},{startY}] - {rectWidth}x{rectHeight}\n" +
+                    $"Summe: {sum}, Pixel: {count}\n" +
+                    $"Ø Tiefe: {avgDepth:0.##} mm";
+                CalculationText.Visibility = Visibility.Visible;
+
+                _selectionStart = null; // Auswahl zurücksetzen
             }
         }
     }

@@ -12,7 +12,7 @@
 
     <ItemGroup>
       <Reference Include="Microsoft.Kinect">
-        <HintPath>..\..\..\..\..\Program Files\Microsoft SDKs\Kinect\v1.8\Assemblies\Microsoft.Kinect.dll</HintPath>
+        <HintPath>..\..\..\..\..\..\Program Files\Microsoft SDKs\Kinect\v1.8\Assemblies\Microsoft.Kinect.dll</HintPath>
       </Reference>
     </ItemGroup>
 

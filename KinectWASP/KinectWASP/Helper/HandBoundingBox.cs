@@ -228,6 +228,7 @@ public class HandBoundingBox
         for (int i = rn + 1; i < input.Length - rn; i++)
         {
             double current = input[i];
+            
 
             // 1. Monotoniekriterium
             bool isMonotone = true;
@@ -240,6 +241,14 @@ public class HandBoundingBox
                     break;
                 }
             }
+            // for (int j = -rn; j < rn; j++)
+            // {
+            //     if ((current < input[i + j]))
+            //     {
+            //         isMonotone = false;
+            //         break;
+            //     }
+            // }
             if (!isMonotone) continue;
 
             // 2. Mindest-Steigung

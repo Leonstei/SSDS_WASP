@@ -192,7 +192,7 @@ namespace KinectWASP
                                 );
                                 double[] averageContourPixels = handBoundingBox.MovingAverageFilter(contourPixels, 6);
                                 List<(int Index, double Value)> maximaPoints =
-                                    handBoundingBox.FindLocalMaximaWithIndices(averageContourPixels, 8, 0.6f);
+                                    handBoundingBox.FindLocalMaximaWithIndices(averageContourPixels, 8, 0.5f);
 
                                 // 4) Hand offen oder zu? 
                                 if (maximaPoints.Count > 1)

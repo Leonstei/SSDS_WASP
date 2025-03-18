@@ -33,7 +33,8 @@ namespace KinectWASP
             // 2) Neues Excel-Package und Worksheet erstellen
             using (var package = new ExcelPackage())
             {
-                var ws = package.Workbook.Worksheets.Add("HandData" + folderName);
+                string worksheetName = "HandData" +folderName;
+                var ws = package.Workbook.Worksheets.Add(worksheetName);
 
                 // 3) Metadaten (Timestamp, Handstatus, BoundingBox) oben in die Tabelle
                 ws.Cells["A1"].Value = "Timestamp";
@@ -130,7 +131,8 @@ namespace KinectWASP
                 }
 
                 // 8) Excel-Datei speichern
-                string excelPath = Path.Combine(folderPath, "handData.xlsx");
+                string exelName = "handData" + folderName + ".xlsx";
+                string excelPath = Path.Combine(folderPath, exelName);
                 package.SaveAs(new FileInfo(excelPath));
             }
 
